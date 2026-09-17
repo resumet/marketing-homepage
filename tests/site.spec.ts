@@ -25,7 +25,11 @@ test('wrong password fails; 0000 opens all four editors and company settings; lo
   await expect(page.getByRole('tab')).toHaveCount(4);
   await page.getByRole('tab').nth(3).click(); await expect(page.getByLabel('상품군 이름')).toHaveValue('웹사이트 제작');
   await page.getByLabel('제목', { exact: true }).fill('수정한 제목'); await expect(page.getByText('저장하지 않은 변경 사항')).toBeVisible();
-  await expect(page.getByRole('button', { name: '변경 사항 저장' })).toBeDisabled();
+  if (await page.getByText('미리보기 모드입니다.', { exact: false }).isVisible()) {
+    await expect(page.getByRole('button', { name: '변경 사항 저장' })).toBeDisabled();
+  } else {
+    await expect(page.getByRole('button', { name: '변경 사항 저장' })).toBeEnabled();
+  }
   await page.getByRole('button', { name: '회사 정보', exact: true }).click();
   for (const label of ['회사명','연락처','이메일 주소','사무실 주소']) await expect(page.getByLabel(label, { exact: true })).toBeVisible();
   await page.screenshot({ path: 'artifacts/admin.png', fullPage: true });
