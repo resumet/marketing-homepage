@@ -1,69 +1,16 @@
-import Image from "next/image";
-
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+import Image from 'next/image';
+import { ArrowDownRight, ArrowUpRight, ArrowRight } from '@phosphor-icons/react/dist/ssr';
+import { Header } from '@/components/header';
+import { Reveal } from '@/components/reveal';
+import { readContent } from '@/lib/db';
+export const dynamic = 'force-dynamic';
+export default async function Home() {
+  const site = await readContent();
+  return <><a href="#main" className="skip-link">본문 바로가기</a><div id="home"/><Header company={site.company}/><main id="main">
+    <section className="hero wrap"><div className="hero-top"><p className="eyebrow">Ideas into impact.</p><p className="hero-intro">브랜드의 가능성을 발견하고,<br/>비즈니스의 다음을 만듭니다.</p></div><h1>좋은 브랜드가<br/><span>더 멀리 가도록.</span><ArrowDownRight className="hero-arrow" weight="light" aria-hidden="true"/></h1><div className="hero-bottom"><p>전략의 깊이와 크리에이티브의 힘.<br/>성장의 모든 순간에 {site.company}이 함께합니다.</p><a className="button primary" href="#services">우리의 서비스 보기 <ArrowRight size={21}/></a></div><div className="hero-image"><Image src="/images/hero.jpg" alt="자연광이 들어오는 크리에이티브 스튜디오" fill priority fetchPriority="high" sizes="(max-width: 768px) 100vw, 90vw"/><div className="hero-image-copy">A new perspective.<br/>A better next.</div></div></section>
+    <section id="about" className="about wrap section"><p className="eyebrow">About {site.company}</p><Reveal className="about-content"><h2>당신의 비즈니스를 이해하는<br/>가장 가까운 파트너.</h2><div className="about-body"><p>멋진 결과물만으로는 충분하지 않습니다.<br/>우리는 브랜드가 풀어야 할 진짜 문제에서 시작합니다.</p><p>브랜드의 방향을 찾고, 고객과의 접점을 만들고, 성과를 확인하는 일까지. 흩어져 있던 마케팅을 하나의 방향으로 연결합니다.</p></div></Reveal></section>
+    <section id="services" className="services wrap section"><div className="section-heading"><p className="eyebrow">What we do</p><h2>성장을 만드는<br/>네 가지 움직임.</h2><p>지금 필요한 서비스부터, 브랜드의 전체 여정까지.</p></div><div className="service-grid">{site.products.map((p, i) => <Reveal key={p.id} className={`service service-${i}`}><div className="service-image"><Image src={p.image} alt={`${p.category} 대표 이미지`} fill sizes="(max-width: 768px) 100vw, 48vw" unoptimized={!p.image.startsWith('/')} /></div><div className="service-heading"><span className="service-index">0{p.id}</span><h3>{p.category}</h3><a href="#contact" aria-label={`${p.category} 문의하기`} className="circle-link"><ArrowUpRight size={26}/></a></div><h4>{p.title}</h4><p className="service-description">{p.description}</p></Reveal>)}</div></section>
+    <section id="process" className="process section"><div className="wrap"><p className="eyebrow">How we work</p><h2>좋은 질문에서 시작해,<br/>분명한 변화로 이어집니다.</h2><div className="process-grid">{[{title:'깊이 듣고',en:'Discover',body:'비즈니스의 현재와 목표를 듣습니다. 고객과 시장을 함께 살피며 해결할 문제를 찾습니다.'},{title:'방향을 잡고',en:'Define',body:'목표에 맞는 전략과 실행 범위를 제안합니다. 일정과 결과물을 투명하게 공유합니다.'},{title:'함께 만들고',en:'Create',body:'전략을 콘텐츠와 경험으로 구현합니다. 긴밀하게 소통하며 완성도를 높입니다.'},{title:'계속 개선합니다',en:'Grow',body:'실행 결과를 살피고 다음 기회를 찾습니다. 배운 것을 다음 액션으로 연결합니다.'}].map(s=><Reveal key={s.en}><span className="process-en">{s.en}</span><h3>{s.title}</h3><p>{s.body}</p></Reveal>)}</div></div></section>
+    <section id="contact" className="contact wrap section"><p className="eyebrow">Let’s make your next.</p><div className="contact-title"><h2>다음 이야기는,<br/>함께 만들어볼까요?</h2><ArrowUpRight weight="light" aria-hidden="true"/></div><p className="contact-lead">작은 고민도 좋습니다. 지금 필요한 마케팅을 이야기해주세요.</p><div className="contact-details"><div><span>이메일</span>{site.email ? <a href={`mailto:${site.email}`}>{site.email}<ArrowUpRight size={20}/></a>:<p>이메일 준비 중</p>}</div><div><span>전화</span>{site.phone ? <a href={`tel:${site.phone.replace(/[^+\d]/g,'')}`}>{site.phone}</a>:<p>연락처 준비 중</p>}</div><div><span>오피스</span><p>{site.address || '오피스 주소 준비 중'}</p></div></div></section>
+  </main><footer className="footer wrap"><a className="wordmark" href="#home">m<span className="brand-dot">.</span><span>{site.company}</span></a><p>© {new Date().getFullYear()} {site.company}. All rights reserved.</p><a href="/admin" className="admin-link">관리자</a></footer></>;
 }

@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 모멘텀 마케팅 홈페이지
 
-## Getting Started
+Next.js + TypeScript + Supabase 기반 반응형 단일 페이지와 관리자입니다.
 
-First, run the development server:
+## 실행
 
-```bash
+```powershell
+npm install
+# .env.local이 없다면 복사합니다.
+Copy-Item .env.example .env.local
+# 아래 출력값을 SESSION_SECRET으로 설정합니다.
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+홈페이지: http://localhost:3000 / 관리자: http://localhost:3000/admin
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+초기 비밀번호는 `0000`입니다. Supabase가 없으면 개발 모드에서 편집 화면을 미리 볼 수 있으나 저장/업로드는 비활성화됩니다. 운영 관리자 로그인에는 Supabase와 SESSION_SECRET 설정이 필요합니다.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Supabase 설정
 
-## Learn More
+1. Supabase 프로젝트를 생성합니다.
+2. SQL Editor에서 `supabase/schema.sql` 전체를 실행합니다.
+3. `.env.local`에 다음 값을 입력하고 개발 서버를 재시작합니다.
 
-To learn more about Next.js, take a look at the following resources:
+```dotenv
+SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVER_ONLY_SERVICE_ROLE_KEY
+ADMIN_PASSWORD=0000
+SESSION_SECRET=YOUR_RANDOM_SECRET_AT_LEAST_32_CHARACTERS
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. `/admin`에서 로그인하여 설정을 저장합니다. 첫 저장 시 기본 콘텐츠를 포함한 전체 설정이 생성됩니다.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+상품군은 4개로 고정되며 이름, 제목, 설명, 이미지(파일 업로드/HTTPS 주소)를 수정할 수 있습니다. 회사명, 전화, 이메일, 사무실 주소도 관리합니다. 연락처가 비어 있으면 ‘준비 중’으로 표시합니다.
 
-## Deploy on Vercel
+서비스 역할 키는 서버 전용입니다. `NEXT_PUBLIC_` 접두사를 붙이지 마세요. RLS는 익명/일반 사용자에게 DB 접근을 허용하지 않습니다. 이미지 업로드는 JPG, PNG, WebP 최대 4MB이며 공개 URL로 표시합니다. 미사용/이전 이미지는 자동 삭제하지 않습니다.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+관리자 세션은 HttpOnly 서명 쿠키(8시간), 로그인 제한은 Supabase 함수(15분당 IP별 10회)로 처리합니다. 개발 모드에서 DB 미연결 시 로그인 제한은 작동하지 않습니다. `ADMIN_PASSWORD`로 비밀번호를 변경할 수 있습니다.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## GitHub 업로드
+
+저장소를 생성한 뒤 실행합니다. 기존 git 설정이 있다면 필요한 단계만 적용합니다.
+
+```powershell
+git init
+git add .
+git commit -m "Build marketing website and admin"
+git branch -M main
+git remote add origin https://github.com/YOUR_ACCOUNT/YOUR_REPOSITORY.git
+git push -u origin main
+```
+
+`.env.local`은 git에서 제외합니다. `.env.example`만 공유합니다.
+
+## Vercel 연결
+
+1. Add New Project에서 GitHub 저장소를 선택합니다.
+2. Next.js 프리셋, 저장소 루트 디렉터리를 사용합니다.
+3. 위 4개 환경변수를 Production 및 필요한 Preview 환경에 등록합니다.
+4. Deploy합니다. 환경변수 변경 후에는 재배포합니다.
+5. `/admin`에서 저장 후 홈페이지를 새로고침하여 확인합니다.
+
+GitHub·Vercel·Supabase 프로젝트는 아직 연결하지 않았습니다.
+
+## 검증 및 파일
+
+```powershell
+npm run lint
+npm run build
+npm test
+```
+
+- 기본 콘텐츠: `src/lib/content.ts`
+- 스타일: `src/app/globals.css`
+- SQL: `supabase/schema.sql`
+- 실제 회사명 확정 시 `src/app/layout.tsx`의 SEO 제목/설명도 수정합니다.
+- 예시 이미지는 Unsplash 사진으로, 실제 고객 작업물이 아닙니다. 이미지 ID는 `DESIGN.md`에 기록합니다.
+- 브라우저 테스트는 Chrome이 설치된 환경에서 Supabase 미연결 개발 모드 기준으로 실행합니다.
+
+[Next.js Server Actions](https://nextjs.org/docs/app/getting-started/mutating-data), [Supabase Storage 업로드](https://supabase.com/docs/guides/storage/uploads/standard-uploads)
